@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+
+  air-conditioning:
+    build:
+      context: src
+      dockerfile: ./Dockerfile
+    container_name: air-conditioning
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=admin
+      - SPRING_RABBITMQ_PASSWORD=admin123
+      - INSTANCE_ID=ar-1
+      - SERVER_PORT=8091
+    ports:
+      - "8091:8091"
+    networks:
+      - ar-network
+    restart: unless-stopped
+
+networks:
+  ar-network:
+    driver: bridge
