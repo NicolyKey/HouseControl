@@ -1,4 +1,4 @@
-package com.example.producer.services;
+package com.example.producer.services.auth;
 
 import org.springframework.stereotype.Service;
 

@@ -10,5 +10,9 @@ public class AirConditioningListener {
     public void actionsAirConditioning(AirConditioning airConditioning){
         System.out.println("air-conditioning state: " + airConditioning.getStatus());
         System.out.println("air-conditioning temperature: " + airConditioning.getTemperatura());
+
+        if(airConditioning.getTemperatura() <= 16 || airConditioning.getTemperatura() >= 27 ){
+            throw  new RuntimeException("Temperatura inválida");
+        }
     }
 }

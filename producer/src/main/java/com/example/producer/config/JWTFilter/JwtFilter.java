@@ -1,6 +1,6 @@
 package com.example.producer.config.JWTFilter;
 
-import com.example.producer.services.JwtService;
+import com.example.producer.services.auth.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

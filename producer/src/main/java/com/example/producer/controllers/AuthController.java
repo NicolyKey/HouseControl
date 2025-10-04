@@ -1,8 +1,8 @@
 package com.example.producer.controllers;
 
 import com.example.producer.controllers.dto.LoginRequest;
-import com.example.producer.services.JwtService;
-import com.example.producer.services.RabbitAuthService;
+import com.example.producer.services.auth.JwtService;
+import com.example.producer.services.auth.RabbitAuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

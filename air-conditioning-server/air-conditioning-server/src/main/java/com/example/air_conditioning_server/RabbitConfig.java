@@ -10,18 +10,52 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class RabbitConfig {
+    public static final String MAIN_QUEUE = "air-conditioning.notification";
+    public static final String RETRY_QUEUE = "air-conditioning.notification.retry";
+    public static final String MAIN_EXCHANGE = "topic.exchange";
+    public static final String RETRY_EXCHANGE = "retry.air.exchange";
+
     @Bean
-    public Queue acQueue() {
-        return new Queue("air-conditioning.notification");
+    public TopicExchange topicExchange() {
+        return new TopicExchange(MAIN_EXCHANGE);
     }
 
     @Bean
-    public Binding binding() {
-        Queue queue = new Queue("air-conditioning.notification");
-        TopicExchange exchange = new TopicExchange("topic.exchange");
-        return BindingBuilder.bind(queue).to(exchange).with("air-conditioning.notification");
+    public TopicExchange retryExchange() {
+        return new TopicExchange(RETRY_EXCHANGE);
+    }
+
+    @Bean
+    public Queue acQueue() {
+        return new Queue(MAIN_QUEUE);
+    }
+
+    @Bean
+    public Queue retryQueue() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-message-ttl", 10_000);
+        args.put("x-dead-letter-exchange", MAIN_EXCHANGE);
+        args.put("x-dead-letter-routing-key", MAIN_QUEUE);
+        return new Queue(RETRY_QUEUE, true, false, false, args);
+    }
+
+    @Bean
+    public Binding mainBinding() {
+        return BindingBuilder.bind(acQueue())
+                .to(topicExchange())
+                .with(MAIN_QUEUE);
+    }
+
+    @Bean
+    public Binding retryBinding() {
+        return BindingBuilder.bind(retryQueue())
+                .to(retryExchange())
+                .with(RETRY_QUEUE);
     }
 
     @Bean
@@ -30,7 +64,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, Jackson2JsonMessageConverter messageConverter) {
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                         Jackson2JsonMessageConverter messageConverter) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
         rabbitTemplate.setMessageConverter(messageConverter);
         return rabbitTemplate;
