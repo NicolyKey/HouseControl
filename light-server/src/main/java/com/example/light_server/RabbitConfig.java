@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Configuration
 public class RabbitConfig {
-    public static final String MAIN_QUEUE = "light.notification";
+    public static final String MAIN_QUEUE = "house.light.notification";
     public static final String RETRY_QUEUE = "light.notification.retry";
     public static final String MAIN_EXCHANGE = "topic.exchange";
     public static final String RETRY_EXCHANGE = "retry.light.exchange";

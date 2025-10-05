@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/air-conditioning")
 public class AirConditioningController {
     AirConditioning airConditioning = new AirConditioning(false, 23);
-    public static final String MAIN_ROUTING_KEY = "air-conditioning.notification";
+    public static final String MAIN_ROUTING_KEY = "house.air-conditioning.notification";
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -34,8 +34,8 @@ public class AirConditioningController {
         if (Temperature.DECREASE == temperature){
             airConditioning.decreaseTemperature();
         }
-        String routingKey = "air-conditioning.notification";
-        rabbitTemplate.convertAndSend("topic.exchange", routingKey, airConditioning);
+
+        rabbitTemplate.convertAndSend("topic.exchange", MAIN_ROUTING_KEY, airConditioning);
         return airConditioning;
     }
 }

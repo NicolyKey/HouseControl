@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Configuration
 public class RabbitConfig {
-    public static final String MAIN_QUEUE = "air-conditioning.notification";
+    public static final String MAIN_QUEUE = "house.air-conditioning.notification";
     public static final String RETRY_QUEUE = "air-conditioning.notification.dlq";
     public static final String TOPIC_EXCHANGE = "topic.exchange";
     public static final String TOPIC_RETRY_EXCHANGE = "topic.exchange.dlx";

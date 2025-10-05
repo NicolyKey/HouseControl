@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LightListener {
-    @RabbitListener(queues = "light.notification")
+    @RabbitListener(queues = "house.light.notification")
     public void actionsLight(Light light) {
         System.out.println("light state: " + light.getStatus());
     }
