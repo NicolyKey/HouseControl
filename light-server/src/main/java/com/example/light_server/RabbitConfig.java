@@ -10,24 +10,14 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Configuration
 public class RabbitConfig {
-    public static final String MAIN_QUEUE = "house.light.notification";
-    public static final String RETRY_QUEUE = "light.notification.retry";
+    public static final String MAIN_QUEUE = "light.notification";
     public static final String MAIN_EXCHANGE = "topic.exchange";
-    public static final String RETRY_EXCHANGE = "retry.light.exchange";
 
     @Bean
     public TopicExchange topicExchange() {
         return new TopicExchange(MAIN_EXCHANGE);
-    }
-
-    @Bean
-    public TopicExchange retryExchange() {
-        return new TopicExchange(RETRY_EXCHANGE);
     }
 
     @Bean
@@ -36,26 +26,10 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue retryQueue() {
-        Map<String, Object> args = new HashMap<>();
-        args.put("x-message-ttl", 10_000);
-        args.put("x-dead-letter-exchange", MAIN_EXCHANGE);
-        args.put("x-dead-letter-routing-key", MAIN_QUEUE);
-        return new Queue(RETRY_QUEUE, true, false, false, args);
-    }
-
-    @Bean
     public Binding mainBinding() {
         return BindingBuilder.bind(lightQueue())
                 .to(topicExchange())
                 .with(MAIN_QUEUE);
-    }
-
-    @Bean
-    public Binding retryBinding() {
-        return BindingBuilder.bind(retryQueue())
-                .to(retryExchange())
-                .with(RETRY_QUEUE);
     }
 
     @Bean
