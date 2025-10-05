@@ -31,7 +31,7 @@ public class RabbitConfig {
     public Binding houseNotificationBinding() {
         return BindingBuilder.bind(houseNotificationQueue())
                 .to(topicExchange())
-                .with("house.#");
+                .with("house.notification.*");
     }
 
     @Bean

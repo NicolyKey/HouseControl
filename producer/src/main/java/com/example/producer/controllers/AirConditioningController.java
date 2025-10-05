@@ -1,6 +1,7 @@
 package com.example.producer.controllers;
 
 
+import com.example.producer.controllers.dto.AirConditioningDTO;
 import com.example.producer.entities.AirConditioning;
 import com.example.producer.enums.Temperature;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -13,29 +14,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/air-conditioning")
 public class AirConditioningController {
-    AirConditioning airConditioning = new AirConditioning(false, 23);
-    public static final String MAIN_ROUTING_KEY = "house.air-conditioning.notification";
-
+    public static final String MAIN_ROUTING_KEY = "house.air-conditioning.command";
+    public static final String EXCHANGE = "topic.exchange";
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
     @PostMapping("{status}")
-    public AirConditioning changeStatus(@PathVariable boolean status){
-        airConditioning.setStatus(status);
-        rabbitTemplate.convertAndSend("topic.exchange", MAIN_ROUTING_KEY, airConditioning);
-        return airConditioning;
+    public String changeStatus(@PathVariable boolean status){
+        AirConditioningDTO dto = new AirConditioningDTO(status, null);
+        rabbitTemplate.convertAndSend(EXCHANGE, MAIN_ROUTING_KEY, dto);
+        return "Comando enviado: " + (status ? "Ligar o ar condicionado" : "Desligar o ar condicionado");
     }
 
     @PostMapping("/temperature/{temperature}")
-    public AirConditioning changeTemperature(@PathVariable Temperature temperature){
-        if (Temperature.INCREASE == temperature){
-            airConditioning.increaseTemperature();
-        }
-        if (Temperature.DECREASE == temperature){
-            airConditioning.decreaseTemperature();
-        }
-
-        rabbitTemplate.convertAndSend("topic.exchange", MAIN_ROUTING_KEY, airConditioning);
-        return airConditioning;
+    public String changeTemperature(@PathVariable Temperature temperature){
+        AirConditioningDTO dto = new AirConditioningDTO(null, temperature);
+        rabbitTemplate.convertAndSend(EXCHANGE, MAIN_ROUTING_KEY, dto);
+        return "Comando enviado: " + (temperature == Temperature.DECREASE ? "Diminuir a temperatura" : "Aumentar a temperatura");
     }
 }

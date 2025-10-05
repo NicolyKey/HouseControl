@@ -12,8 +12,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
-    public static final String MAIN_QUEUE = "light.notification";
+    public static final String MAIN_QUEUE = "house.light.command";
     public static final String MAIN_EXCHANGE = "topic.exchange";
+    public static final String NOTIFICATION_QUEUE = "house.notification.light";
 
     @Bean
     public TopicExchange topicExchange() {
@@ -26,10 +27,22 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue lightNotificationQueue() {
+        return new Queue(NOTIFICATION_QUEUE);
+    }
+
+    @Bean
     public Binding mainBinding() {
         return BindingBuilder.bind(lightQueue())
                 .to(topicExchange())
                 .with(MAIN_QUEUE);
+    }
+
+    @Bean
+    public Binding notificationBinding() {
+        return BindingBuilder.bind(lightNotificationQueue())
+                .to(topicExchange())
+                .with(NOTIFICATION_QUEUE);
     }
 
     @Bean

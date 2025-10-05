@@ -12,10 +12,11 @@ import java.util.Map;
 
 @Configuration
 public class RabbitConfig {
-    public static final String MAIN_QUEUE = "house.air-conditioning.notification";
+    public static final String MAIN_QUEUE = "house.air-conditioning.command";
     public static final String RETRY_QUEUE = "air-conditioning.notification.dlq";
     public static final String TOPIC_EXCHANGE = "topic.exchange";
     public static final String TOPIC_RETRY_EXCHANGE = "topic.exchange.dlx";
+    public static final String NOTIFICATION_AC_QUEUE = "house.notification.ac";
 
 
     @Bean
@@ -34,12 +35,26 @@ public class RabbitConfig {
     }
 
     @Bean
+    public Queue notificationQueue() {
+        return  new Queue(NOTIFICATION_AC_QUEUE);
+    }
+
+    @Bean
     public Binding mainBinding() {
         TopicExchange exchange = new TopicExchange(TOPIC_EXCHANGE);
         return BindingBuilder
                 .bind(acQueue())
                 .to(exchange)
                 .with(MAIN_QUEUE);
+    }
+
+    @Bean
+    public Binding notificationBinding() {
+        TopicExchange exchange = new TopicExchange(TOPIC_EXCHANGE);
+        return BindingBuilder
+                .bind(notificationQueue())
+                .to(exchange)
+                .with(NOTIFICATION_AC_QUEUE);
     }
 
     @Bean
