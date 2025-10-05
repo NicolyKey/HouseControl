@@ -1,8 +1,5 @@
 package com.example.producer.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -13,17 +10,21 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 public class RabbitConfig {
 
     public static final String TOPIC_EXCHANGE = "topic.exchange";
+    public static final String TOPIC_RETRY_EXCHANGE = "topic.exchange.dlx";
 
     @Bean
     public TopicExchange topicExchange() {
         return new TopicExchange(TOPIC_EXCHANGE);
+    }
+
+    @Bean
+    public TopicExchange topicExchangeDLX() {
+        return new TopicExchange(TOPIC_RETRY_EXCHANGE);
     }
 
     @Bean

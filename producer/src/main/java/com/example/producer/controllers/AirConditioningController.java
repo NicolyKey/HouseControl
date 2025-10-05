@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/air-conditioning")
 public class AirConditioningController {
     AirConditioning airConditioning = new AirConditioning(false, 23);
+    public static final String MAIN_ROUTING_KEY = "air-conditioning.notification";
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
@@ -21,8 +22,7 @@ public class AirConditioningController {
     @PostMapping("{status}")
     public AirConditioning changeStatus(@PathVariable boolean status){
         airConditioning.setStatus(status);
-        String routingKey = "air-conditioning.notification";
-        rabbitTemplate.convertAndSend("topic.exchange", routingKey, airConditioning);
+        rabbitTemplate.convertAndSend("topic.exchange", MAIN_ROUTING_KEY, airConditioning);
         return airConditioning;
     }
 

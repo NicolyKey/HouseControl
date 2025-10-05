@@ -21,16 +21,10 @@ public class AirConditioning {
     }
 
     public void increaseTemperature(){
-        if(!this.status){
-            throw new RuntimeException("Falha ao tentar aumentar a temperatura de um ar desligado");
-        }
         setTemperatura(this.temperatura + 1);
     }
 
     public void decreaseTemperature(){
-        if(!this.status){
-            throw new RuntimeException("Falha ao tentar abaixar a temperatura de um ar desligado");
-        }
         setTemperatura(this.temperatura - 1);
     }
 }

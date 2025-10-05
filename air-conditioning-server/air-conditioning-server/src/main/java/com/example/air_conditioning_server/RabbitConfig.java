@@ -1,9 +1,6 @@
 package com.example.air_conditioning_server;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -16,45 +13,41 @@ import java.util.Map;
 @Configuration
 public class RabbitConfig {
     public static final String MAIN_QUEUE = "air-conditioning.notification";
-    public static final String RETRY_QUEUE = "air-conditioning.notification.retry";
-    public static final String MAIN_EXCHANGE = "topic.exchange";
-    public static final String RETRY_EXCHANGE = "retry.air.exchange";
+    public static final String RETRY_QUEUE = "air-conditioning.notification.dlq";
+    public static final String TOPIC_EXCHANGE = "topic.exchange";
+    public static final String TOPIC_RETRY_EXCHANGE = "topic.exchange.dlx";
 
-    @Bean
-    public TopicExchange topicExchange() {
-        return new TopicExchange(MAIN_EXCHANGE);
-    }
-
-    @Bean
-    public TopicExchange retryExchange() {
-        return new TopicExchange(RETRY_EXCHANGE);
-    }
 
     @Bean
     public Queue acQueue() {
-        return new Queue(MAIN_QUEUE);
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-dead-letter-exchange", TOPIC_RETRY_EXCHANGE);
+        args.put("x-dead-letter-routing-key", RETRY_QUEUE);
+        return new Queue(MAIN_QUEUE, true, false, false, args);
     }
 
     @Bean
     public Queue retryQueue() {
         Map<String, Object> args = new HashMap<>();
         args.put("x-message-ttl", 10_000);
-        args.put("x-dead-letter-exchange", MAIN_EXCHANGE);
-        args.put("x-dead-letter-routing-key", MAIN_QUEUE);
         return new Queue(RETRY_QUEUE, true, false, false, args);
     }
 
     @Bean
     public Binding mainBinding() {
-        return BindingBuilder.bind(acQueue())
-                .to(topicExchange())
+        TopicExchange exchange = new TopicExchange(TOPIC_EXCHANGE);
+        return BindingBuilder
+                .bind(acQueue())
+                .to(exchange)
                 .with(MAIN_QUEUE);
     }
 
     @Bean
     public Binding retryBinding() {
-        return BindingBuilder.bind(retryQueue())
-                .to(retryExchange())
+        TopicExchange exchange = new TopicExchange(TOPIC_RETRY_EXCHANGE);
+        return BindingBuilder
+                .bind(retryQueue())
+                .to(exchange)
                 .with(RETRY_QUEUE);
     }
 
