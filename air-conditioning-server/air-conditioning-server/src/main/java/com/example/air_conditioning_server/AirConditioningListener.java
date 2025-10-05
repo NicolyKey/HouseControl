@@ -5,8 +5,8 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
+import com.rabbitmq.client.Channel;
+import org.springframework.amqp.core.Message;
 
 @Component
 public class AirConditioningListener {
@@ -16,31 +16,40 @@ public class AirConditioningListener {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    @RabbitListener(queues = "house.air-conditioning.command")
-    public void actionsAirConditioning(AirConditioningDTO message){
-        if (message.getStatus() != null)
-            airConditioning.setStatus(message.getStatus());
+    @RabbitListener(queues = "house.air-conditioning.command", ackMode = "MANUAL")
+    public void actionsAirConditioning(AirConditioningDTO message, Channel channel, Message springMessage){
+        try {
+            if (message.getStatus() != null)
+                airConditioning.setStatus(message.getStatus());
 
-        if (message.getTemperature() != null){
-            if (message.getTemperature() == Temperature.INCREASE){
-                if (airConditioning.getTemperatura() < 27)
-                    airConditioning.setTemperatura(airConditioning.getTemperatura()+1);
-                else
-                    throw  new RuntimeException("Temperatura inválida");
-            } else if (message.getTemperature() == Temperature.DECREASE) {
-                if (airConditioning.getTemperatura() >16)
-                    airConditioning.setTemperatura(airConditioning.getTemperatura()-1);
-                else
-                    throw  new RuntimeException("Temperatura inválida");
+            if (message.getTemperature() != null){
+                if (message.getTemperature() == Temperature.INCREASE){
+                    if (airConditioning.getTemperatura() < 27)
+                        airConditioning.setTemperatura(airConditioning.getTemperatura()+1);
+                    else
+                        throw  new RuntimeException("Temperatura inválida");
+                } else if (message.getTemperature() == Temperature.DECREASE) {
+                    if (airConditioning.getTemperatura() >16)
+                        airConditioning.setTemperatura(airConditioning.getTemperatura()-1);
+                    else
+                        throw  new RuntimeException("Temperatura inválida");
+                }
+            }
+
+            System.out.println("air-conditioning state: " + airConditioning.getStatus());
+            System.out.println("air-conditioning temperature: " + airConditioning.getTemperatura());
+
+            rabbitTemplate.convertAndSend("topic.exchange",
+                    "house.notification.ac",
+                    "Ar-condicionado atualizado: status=" + airConditioning.getStatus()
+                            + ", temp=" + airConditioning.getTemperatura());
+            channel.basicAck(springMessage.getMessageProperties().getDeliveryTag(), false);
+        } catch (Exception e) {
+            try {
+                channel.basicNack(springMessage.getMessageProperties().getDeliveryTag(), false, true);
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
         }
-
-        System.out.println("air-conditioning state: " + airConditioning.getStatus());
-        System.out.println("air-conditioning temperature: " + airConditioning.getTemperatura());
-
-        rabbitTemplate.convertAndSend("topic.exchange",
-                "house.notification.ac",
-                "Ar-condicionado atualizado: status=" + airConditioning.getStatus()
-                        + ", temp=" + airConditioning.getTemperatura());
     }
 }
