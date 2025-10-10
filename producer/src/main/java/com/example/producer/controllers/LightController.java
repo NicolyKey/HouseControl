@@ -1,6 +1,5 @@
 package com.example.producer.controllers;
 
-import com.example.producer.entities.Light;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

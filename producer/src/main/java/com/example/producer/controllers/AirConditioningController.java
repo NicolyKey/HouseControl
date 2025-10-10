@@ -2,7 +2,6 @@ package com.example.producer.controllers;
 
 
 import com.example.producer.controllers.dto.AirConditioningDTO;
-import com.example.producer.entities.AirConditioning;
 import com.example.producer.enums.Temperature;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
