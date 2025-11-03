@@ -19,6 +19,9 @@
 - Utilizaremos o delayed exchange no RabbitMQ
 
 ---
+- persistir as mensagens do rabbit no banco para se caso o cara cair eu conseguir consumir daquela tabela
+- Deixar a logica de prioridade nos listeners
+
 
 ### Definições técnicas
 
